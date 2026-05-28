@@ -1,0 +1,178 @@
+DATA STRUCTURES CHEATSHEET
+===========================
+Sve strukture, sloznosti, kada koristiti i tipicne kombinacije.
+
+---------------------------------------------------------------
+
+ARRAY / ARRAYLIST
+------------------
+Operacija           Sloznost
+get(index)          O(1)       ← jaka strana
+add(end)            O(1) amort
+add(middle)         O(n)       ← slaba strana
+remove(end)         O(1)
+remove(middle)      O(n)       ← slaba strana
+contains(val)       O(n)
+
+Koristiti kada:
+  - Trebaš random access po indeksu.
+  - Trebaš getRandom() operaciju.
+  - Imaš fiksni redosled elemenata.
+
+Slabost: brisanje iz sredine je skupo.
+Trik:    za O(1) brisanje — zameni s poslednjim, pa obrisi kraj.
+
+
+LINKEDLIST
+-----------
+Operacija           Sloznost
+add(front/back)     O(1)       ← jaka strana
+remove(front/back)  O(1)       ← jaka strana
+remove(middle node) O(1)  ← AKO IMAS REFERENCU NA CVOR
+get(index)          O(n)       ← slaba strana
+contains(val)       O(n)
+
+Koristiti kada:
+  - Često dodajes/brises s oba kraja.
+  - Imaš referencu na čvor koji trebas brisati (DLL + HashMap).
+
+Slabost: nema random access.
+
+
+HASHMAP
+--------
+Operacija           Sloznost
+put(key, val)       O(1) amort
+get(key)            O(1) amort ← jaka strana
+remove(key)         O(1) amort
+containsKey(key)    O(1) amort
+
+Koristiti kada:
+  - Trebaš brzo tražiti po kljucu.
+  - Trebaš mapirati element → broj pojavljivanja.
+  - Trebaš mapirati element → pozicija u listi (InsertDeleteGetRandom).
+
+Slabost: ne cuva redosled, nema sortiranja.
+
+
+LINKEDHASHMAP
+--------------
+Operacija           Sloznost
+put(key, val)       O(1) amort
+get(key)            O(1) amort
+remove(key)         O(1) amort
+first entry         O(1)       ← jaka strana — cuva redosled umetanja
+
+Koristiti kada:
+  - Trebaš HashMap ALI i cuanje redosleda umetanja.
+  - Trebaš brzo brisanje + ocuvanje redosleda.
+
+Primer: FirstUniqueNumber, LRU Cache.
+
+
+HASHSET
+--------
+Operacija           Sloznost
+add(val)            O(1) amort
+contains(val)       O(1) amort ← jaka strana
+remove(val)         O(1) amort
+
+Koristiti kada:
+  - Trebaš pratiti koji elementi su vidjeni (visited!).
+  - Trebaš brzu provjeru duplikata.
+
+Slabost: nema redosleda, nema pristupa po indeksu.
+
+
+TREEMAP
+--------
+Operacija           Sloznost
+put(key, val)       O(log n)
+get(key)            O(log n)
+firstKey()          O(log n)
+lastKey()           O(log n)
+floorKey(k)         O(log n)   ← jaka strana — najblizi kljuc <= k
+
+Koristiti kada:
+  - Trebaš sortiran redosled kljuceva.
+  - Trebaš range query: "svi kljucevi između X i Y".
+  - Trebaš timestamp-based lookup (TimeBasedKeyValueStore).
+
+Slabost: sve operacije O(log n), ne O(1).
+
+
+QUEUE (LinkedList kao Queue)
+------------------------------
+Operacija           Sloznost
+offer/add (back)    O(1)
+poll (front)        O(1)       ← jaka strana — FIFO
+peek (front)        O(1)
+
+Koristiti kada: BFS, FIFO processing, stream obrada.
+
+
+STACK (Deque/ArrayDeque)
+-------------------------
+Operacija           Sloznost
+push (top)          O(1)
+pop (top)           O(1)       ← jaka strana — LIFO
+peek (top)          O(1)
+
+Koristiti kada: DFS, undo/redo, matching zagrada, BrowserHistory.
+
+
+DEQUE (ArrayDeque)
+-------------------
+Operacija           Sloznost
+addFirst / addLast  O(1)       ← jaka strana — O(1) s oba kraja
+removeFirst/Last    O(1)       ← jaka strana
+peekFirst/Last      O(1)
+
+Koristiti kada:
+  - Trebaš raditi s oba kraja istovremeno.
+  - Monotonic deque pattern (SlidingWindowMaximum).
+  - Moze biti i Stack i Queue.
+
+
+PRIORITYQUEUE — MIN HEAP (default Java)
+-----------------------------------------
+Operacija           Sloznost
+add(val)            O(log n)
+poll() — min        O(log n)   ← daje NAJMANJI element
+peek() — min        O(1)       ← jaka strana
+
+PRIORITYQUEUE — MAX HEAP (Collections.reverseOrder())
+------------------------------------------------------
+peek() — max        O(1)       ← jaka strana — daje NAJVECI element
+
+Koristiti kada:
+  - Uvek trebas najmanji/najveci element.
+  - Top K problema.
+  - Two heaps pattern (MedianFromStream).
+
+Kombinacija: MaxHeap + MinHeap = O(1) median.
+
+
+---------------------------------------------------------------
+
+KOMBINACIJE — BRZA REFERENCA
+==============================
+
+Problem                     Struktura 1          Struktura 2
+------------------------------------------------------------
+First Unique Number         LinkedHashMap        HashSet
+Min/Max Stack               Stack (elementi)     Stack (minimumi)
+Browser History             Stack (nazad)        Stack (napred)
+LRU Cache                   HashMap              Doubly LinkedList
+Sliding Window Max          Array (output)       Monotonic Deque
+Median from Stream          MaxHeap (leva pol) MinHeap (desna pol)
+Insert Delete GetRandom     HashMap (val→idx)    ArrayList (elementi)
+Time Key-Value Store        HashMap (key→...)    TreeMap (time→val)
+
+---------------------------------------------------------------
+
+ZLATNO PRAVILO
+==============
+Ako jedna operacija mora biti O(1) a druga struktura to ne podrzava,
+ne pokusavaj "naterati" jednu strukturu da radi sve.
+Podeli odgovornost — jedna struktura, jedan posao.

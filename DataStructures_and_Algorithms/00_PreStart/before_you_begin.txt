@@ -1,0 +1,129 @@
+PRE NEGO KRENES — Data Structures & Algorithms Interview
+===========================================================
+
+STA OVAJ INTERVJU MERI
+------------------------
+- Znaš li prepoznati koji algoritam / struktura resava problem.
+- Znaš li uporediti vise pristupa i objasniti zasto si izabrao taj.
+- Znaš li analizirati vremensku i prostornu sloznost.
+- Znaš li da evoluiras resenje — od prostog ka optimalnom.
+
+
+MINDSET PRE POCETKA
+----------------------
+1. Intervju nije test memorije. Intervju je razgovor.
+   Misli naglas. Interviewer zeli da vidi HOW ti razmisljas.
+
+2. Nije katastrofa ako ne znaš optimalno resenje odmah.
+   Katastrofa je cutati i ne komunicirati.
+
+3. Brute force koji radi + objasnjeno zasto je los = bolji rezultat
+   od optimalnog resenja koje si samo napisao bez reci.
+
+
+KORAK PO KORAK — KAKO PRISTUPITI SVAKOM ZADATKU
+-------------------------------------------------
+
+KORAK 1 — RAZUMIJ ZADATAK (2-3 minute)
+  - Ponovi zadatak svojim recima: "Dakle, ako sam dobro razumio..."
+  - Pitaj za edge case-ove:
+      "Sta ako je niz prazan?"
+      "Moze li biti negativnih brojeva?"
+      "Moze li isti element biti dva puta?"
+  - Pitaj za ogranicenja:
+      "Kolika je maksimalna velicina ulaza?"
+      "Da li trebam brinuti o memoriji?"
+  Ne kreci s pisanjem koda dok nisi siguran sta se trazi.
+
+KORAK 2 — BRUTE FORCE GLASNO (2-3 minute)
+  - Uvek kreni od najjednostavnijeg resenja.
+  - Recи: "Brute force pristup bi bio... ali njegova sloznost je O(n^2)
+           sto nije prihvatljivo jer..."
+  - Nemoj ga pisati ako ne treba — samo objasni ideju.
+
+KORAK 3 — OPTIMIZACIJA (razmisljaj naglas)
+  - "Vidim da obilazimo iste puteve vise puta — mozemo ih zapamtiti."
+  - "Ovde nam treba brz pristup po kljucu — HashMap daje O(1)."
+  - "Treba da pratiti redosled umetanja — LinkedHashMap to cuva."
+  - "Trazimo najkraci put — BFS garantuje minimum koraka."
+  Svaki put kad das ideju, OBJASNI ZASTO. Ne samo sta, nego ZASTO.
+
+KORAK 4 — NAPISI KOD
+  - Pisi cistim kodom, dobro imenuj varijable.
+  - Komentiraj kljucne odluke: "// visited sprecava beskonacne cikluse"
+  - Ako zaglavi, recii "Trebam razmisliti o ovom dijelu, idemo dalje pa se
+    vracamo" — nemoj cutati.
+
+KORAK 5 — ANALIZIRAJ SLOZNOST
+  - Odmah nakon koda, bez cekanja da te pitaju:
+    "Vremenska sloznost ovog resenja je O(n) jer svaki čvor posetimo
+     tacno jednom. Prostorna sloznost je O(n) zbog visited niza."
+  - Ovo pokazuje da razumes sta si napisao.
+
+KORAK 6 — TESTIRAJ
+  - Prodi kroz primer rukom: "Ako uzmemo [4,2,3], krecem od indeksa 0..."
+  - Proveri edge case koji si pitao na početku.
+
+
+KAKO OBJASNITI OPTIMIZACIJU (KLJUCNO)
+--------------------------------------
+Interviewer ne trazi samo resenje. Trazi da cuje tvoje razmisljanje.
+
+Primer za zabu:
+  LOSE:  "Koristim BFS s visited nizom."
+  DOBRO: "Primjecujem da zaba moze skakati i napred i nazad,
+          sto znaci da mozemo posetiti isti indeks vise puta
+          i uci u beskonacnu petlju. Zbog toga trebamo visited niz
+          koji nas stiti od toga. A posto trazimo samo da/ne odgovor,
+          BFS je prirodan izbor jer sistematski istrazuje sve dostizne
+          pozicije bez ponavljanja."
+
+Svaka odluka = obrazlozenje. UVEK.
+
+
+CESTE GRESKE
+-------------
+x  Cuti i pise kod bez komunikacije.
+x  Preskoci brute force i krene direktno na optimalno bez objasnjenja.
+x  Napise kod pa ceka da ga pitaju za sloznost — recii sam.
+x  Zaboravi edge case-ove (prazan niz, jedan element, sve duplikati...).
+x  Koristi lose nazive: "temp", "x", "arr2" — pisi opisno.
+
+
+KAKO POKRENUTI TESTOVE
+-----------------------
+Svaki zadatak ima dva fajla:
+  Solution.java  — tvoje resenje (ovde pises kod)
+  Main.java      — test casovi (ne menjaj)
+
+POKRETANJE — iz terminala (cmd ili PowerShell):
+
+  # Opcija 1 — run.bat skripta (iz korenog foldera)
+  cd C:\Users\Korisnik\Documents\Intervju\DataStructures_and_Algorithms
+  run.bat 01_GraphHasPath_BFS
+
+  # Opcija 2 — direktno iz problem foldera
+  cd C:\Users\Korisnik\Documents\Intervju\DataStructures_and_Algorithms\01_GraphHasPath_BFS
+  javac *.java
+  java Main
+
+  # Opcija 3 — IntelliJ
+  Otvori Main.java → desni klik → Run 'Main.main()'
+
+KAKO CITATI REZULTAT:
+  PASS  Test 1 — postoji put 0->1->2->3     ← test prosao
+  FAIL  Test 2 — ...                         ← test pao
+        Ocekivano: true   Dobijeno: false    ← sta je pogresilo
+
+NAPOMENA:
+  Main.java postoji samo za zadatke koje smo vec radili.
+  Za nove zadatke — dodajemo Main.java zajedno kad krenemo na taj zadatak.
+
+
+STVARI KOJE NIJE LOSE PONOVITI PRE INTERVJUA
+----------------------------------------------
+[ ] BFS template — vidi BFS_algorithm.txt
+[ ] DFS template — vidi DFS_algorithm.txt
+[ ] Kada koristiti BFS, kada DFS — vidi BFSvsDFS_QA (u 03 folderu)
+[ ] Vremenska/prostorna sloznost osnovnih operacija
+[ ] Kako izgledati visited pattern i zasto je bitan

@@ -1,0 +1,56 @@
+APPROACHES
+==========
+
+VAZNO: Zaba moze skociti I + arr[i] (napred) ILI I - arr[i] (nazad).
+       Ovo je graph problem — greedy NE radi!
+
+
+1. Brute Force (Rekurzija bez pracenja posjeta)
+--------------------------
+- Rekurzivno pokusavaj oba skoka (napred i nazad) iz svake pozicije.
+- Problem: možeš uci u beskonacnu petlju (0->2->0->2->...)
+- Nije validno resenje bez visited pracenja.
+
+- Time Complexity:  O(beskonacno) — moze se vrtiti u krug
+- Space Complexity: O(n) — rekurzivni stack
+
+
+2. DFS + visited[] array
+--------------------------
+- Isto kao brute force rekurzija, ali pratimo koje smo pozicije vec posetili.
+- Ako smo vec bili na poziciji i — ne idemo tamo ponovo.
+- visited[] sprecava beskonacne petlje i eliminise dupliranje posla.
+
+- Time Complexity:  O(n) — svaki čvor posetimo maksimalno jednom
+- Space Complexity: O(n) — visited niz + rekurzivni stack
+
+
+3. BFS + visited[] array  (Optimalno i najcistije)
+--------------------------
+- Koristimo Queue da istrazujemo pozicije sloj po sloj.
+- Za svaku poziciju dodamo i+arr[i] i i-arr[i] u queue (ako su u granicama i nisu poseti).
+- Cim dodjemo do n-1, vracamo true.
+- Ako queue ostane prazan, vracamo false.
+
+- Time Complexity:  O(n) — svaki čvor jednom u queue
+- Space Complexity: O(n) — queue + visited niz
+
+Zasto BFS a ne DFS?
+  - Oba daju isti rezultat (da/ne) pa je tehnicko pitanje.
+  - BFS je prirodniji za "postoji li put" pitanja.
+  - DFS je prirodniji za "izlistaj sve puteve".
+  - Na intervjuu — objasni oba, implementiraj BFS.
+
+
+SUMMARY TABLE
+-------------
+Approach          Time         Space     Ispravno?
+---------------------------------------------------
+Brute Force       O(beskonacno) O(n)     NE (petlja)
+DFS + visited     O(n)          O(n)     DA
+BFS + visited     O(n)          O(n)     DA  ← preporuka
+
+NAPOMENA:
+- Greedy ne radi jer zaba moze ici unazad.
+- DP u klasicnom smislu takodje ne radi direktno jer postoje ciklusi.
+- visited[] niz je kljuc — bez njega zadatak nema ispravno resenje.

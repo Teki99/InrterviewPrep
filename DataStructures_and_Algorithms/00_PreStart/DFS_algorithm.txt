@@ -1,0 +1,125 @@
+DFS — Depth First Search
+=========================
+
+STA JE DFS
+-----------
+DFS istrazuje graf IducI sto DUBLJE MOZE po jednoj grani,
+pa se vraca (backtrack) i pokusava drugu granu.
+
+Misli o tome kao o istrazivanju labirinta:
+ides hodnicima do kraja, pa se vratas na raskrsnicu i probas drugi hodnik.
+
+
+KADA KORISTITI DFS
+-------------------
+✓ "Da li postoji put od A do B?" (radi, ali BFS je bolji za kratke puteve)
+✓ "Postoji li ciklus u grafu?"
+✓ "Izlistaj SVE moguce puteve od A do B"
+✓ "Pretrazi cijelu komponentu grafa"
+✓ Kada je resenje verovatno duboko u grafu, ne blizu početka.
+
+
+STRUKTURA PODATAKA
+-------------------
+DFS koristi STACK — implicitno kroz rekurziju,
+ili eksplicitno kao Deque/Stack objekat.
+LIFO — zadnji usao, prvi se obra duje.
+
+
+JAVA TEMPLATE — REKURZIVNI (najćešcи)
+---------------------------------------
+
+Set<Integer> visited = new HashSet<>();
+
+boolean dfs(Map<Integer, List<Integer>> graph, int current, int target) {
+    if (current == target) return true;      // nasli smo cilj
+    if (visited.contains(current)) return false; // vec posecen
+
+    visited.add(current);                    // označi kao posecen
+
+    for (int neighbour : graph.get(current)) {
+        if (dfs(graph, neighbour, target)) {
+            return true;                     // put pronadjen u dubini
+        }
+    }
+    return false;                            // nema puta ovom granom
+}
+
+
+JAVA TEMPLATE — ITERATIVNI (eksplicitni stack)
+-----------------------------------------------
+
+boolean dfs(Map<Integer, List<Integer>> graph, int start, int target) {
+    Deque<Integer> stack   = new ArrayDeque<>();
+    Set<Integer>   visited  = new HashSet<>();
+
+    stack.push(start);
+
+    while (!stack.isEmpty()) {
+        int current = stack.pop();
+
+        if (current == target) return true;
+        if (visited.contains(current)) continue;
+
+        visited.add(current);
+
+        for (int neighbour : graph.get(current)) {
+            if (!visited.contains(neighbour)) {
+                stack.push(neighbour);
+            }
+        }
+    }
+    return false;
+}
+
+
+IMPLICITNI GRAF (npr. FrogJump)
+---------------------------------
+
+boolean dfs(int[] arr, boolean[] visited, int current, int n) {
+    if (current == n - 1) return true;
+    if (current < 0 || current >= n) return false;
+    if (visited[current]) return false;
+
+    visited[current] = true;
+
+    return dfs(arr, visited, current + arr[current], n)
+        || dfs(arr, visited, current - arr[current], n);
+}
+
+
+DETEKCIJA CIKLUSA
+------------------
+Za detekciju ciklusa u NEUSMJERENOM grafu:
+- Ciklus postoji ako naidemo na vec posecen čvor
+  koji NIJE roditelj trenutnog čvora.
+
+Za detekciju ciklusa u USMJERENOM grafu:
+- Treba da pratiti "aktivne" čvorove na trenutnom rekurzivnom stacku
+  (nije dovoljno samo visited — čvor moze biti visited ali ne uzrokovati ciklus).
+
+
+VREMENSKA I PROSTORNA SLOZNOST
+--------------------------------
+- Vremenska: O(V + E)  — isti kao BFS
+- Prostorna: O(V)      — rekurzivni stack (ili eksplicitni stack)
+             OPASNOST: na dubokim grafovima moze biti StackOverflow!
+             Za velike ulaze, preferiraj iterativni DFS ili BFS.
+
+
+BFS vs DFS — BRZA REFERENCA
+-----------------------------
+
+                    BFS             DFS
+Struktura:          Queue (FIFO)    Stack / Rekurzija (LIFO)
+Najkraci put:       DA              NE
+Svi putevi:         NE              DA
+Ciklus detekcija:   moze            prirodnije
+Memorija (sirok):   VISE            manje
+Memorija (dubok):   manje           VISE
+Implementacija:     iterativna      rekurzivna (jednostavnija)
+
+KLJUCNO PRAVILO:
+  Trebas NAJKRACI PUT?        → BFS
+  Trebas SVE MOGUCE PUTEVE?   → DFS
+  Jednostavno da/ne?          → oboje radi, DFS je krace pisati

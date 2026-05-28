@@ -1,0 +1,58 @@
+BFS vs DFS — Otvorena Pitanja
+==============================
+
+Pokusaj da odgovoris na svako pitanje PRIJE nego sto pogledas answers.txt.
+Zapisuj odgovore u svom stilu — bitno je da razumes, ne da memorises.
+
+---------------------------------------------------------------
+
+OSNOVNA PITANJA
+
+Q1. Koja je osnovna razlika u nacinu na koji BFS i DFS obilaze graf?
+
+Q2. Koju strukturu podataka koristi BFS? Koju koristi DFS?
+
+Q3. Sta se desava ako zaboravis visited[] u BFS-u? Sta u DFS-u?
+
+Q4. Koji algoritam garantuje najkraci put (minimum koraka) u neuteznenom grafu?
+    Zasto drugi ne garantuje?
+
+---------------------------------------------------------------
+
+SLOZZENOST
+
+Q5. Koja je vremenska sloznost i BFS i DFS?
+    Zasto su isti ako rade na razlicit nacin?
+
+Q6. Koji ima vecu prostornu sloznost u siroko razgranatom grafu (mnogo komksija)?
+    Koji u duboko razgranatom (lanac čvorova)?
+
+---------------------------------------------------------------
+
+PRIMJENA
+
+Q7. Imaš zadatak: "Da li postoji put od A do B?" — BFS ili DFS?
+
+Q8. Imaš zadatak: "Koji je NAJKRACI put od A do B?" — BFS ili DFS?
+
+Q9. Imaš zadatak: "Postoji li ciklus u grafu?" — BFS ili DFS?
+
+Q10. Imaš zadatak: "Izlistaj sve moguce puteve od A do B" — BFS ili DFS?
+
+Q11. Zasto je BFS prirodniji za FrogJump "da/ne" pitanje
+     iako bi i DFS dao tacan odgovor?
+
+---------------------------------------------------------------
+
+KONCEPTUALNO
+
+Q12. BFS istrazuje graf "po slojevima". Sta to tacno znaci?
+
+Q13. DFS istrazuje graf "do dna pa nazad". Sta se desava
+     kada DFS ne moze dalje?
+
+Q14. Moze li se DFS implementirati iterativno (bez rekurzije)?
+     Ako da, sta se koristi umesto rekurzivnog stacka?
+
+Q15. U FrogJump problemu — zasto visited[] array sprecava beskonacnu petlju?
+     Sta bi se desilo bez njega na primeru [2, 1] ?

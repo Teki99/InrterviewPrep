@@ -1,0 +1,76 @@
+ROADMAP — Put do Frog Jump problema
+=====================================
+
+Cilj: Svaki zadatak gradi jedan novi BFS/DFS koncept.
+Na kraju ćeš razumeti BFS i DFS dovoljno duboko da resis FrogJump
+i svaki slican zadatak bez obzira na domen (niz, grid, string...).
+
+Kljucni pattern koji gradimo:
+  Queue + visited + implicit graph = BFS
+  Rekurzija/Stack + visited        = DFS
+
+---------------------------------------------------------------
+
+[ ] 01_GraphHasPath_BFS  *** EASY ***
+    Koncept: Cist BFS intro — queue + visited + adjacency list
+    Sta ucis: BFS template koji ćeš koristiti svuda.
+              Najvaznije: naucis ga OVDE, primenjujes SVUGDE.
+
+[ ] 02_GraphHasPath_DFS  *** EASY ***
+    Koncept: ISTI zadatak, DFS pristup — rekurzija + visited
+    Sta ucis: Uporedi BFS i DFS na istom problemu.
+              Razumij razliku u kodu, razmisljanju i ponasanju.
+
+[ ] 03_BFSvsDFS_QA       *** TEORIJA ***
+    Koncept: Otvorena pitanja o BFS vs DFS
+    Sta ucis: Kad koristiti koji? Sloznosti? Strukture podataka?
+              Odgovori na pitanja PRIJE nego pogledas answers.txt!
+
+[ ] 04_FloodFill         *** EASY ***
+    Koncept: BFS na 2D gridu — implicitni graf (komšije = pozicije)
+    Sta ucis: Komsije se ne daju eksplicitno, izvode se iz pozicije.
+              Ovo je ISTI koncept kao FrogJump (komšije = i±arr[i]).
+
+[ ] 05_JumpGameFixed     *** EASY-MEDIUM ***
+    Koncept: Niz kao implicitni graf, fiksni skok
+    Sta ucis: BFS na nizu umesto na gridu. Most ka FrogJumpu.
+
+[ ] 06_FrogJump          *** MEDIUM ***  <-- nas glavni zadatak ⭐
+    Koncept: BFS bidirekcijalni na nizu + visited
+    Sta ucis: Kombinujes sve prethodne koncepte.
+              Komsije su i+arr[i] i i-arr[i]. Visited sprecava cikluse.
+
+[ ] 07_MinimumJumps      *** HARD ***
+    Koncept: BFS nivoi = minimum koraka (forward only)
+    Sta ucis: BFS level-by-level brojanje. Kada prvi put stignes do cilja
+              — to je minimalan broj skokova. Priprema za 11.
+
+[ ] 08_NumberOfIslands   *** HARD ***
+    Koncept: BFS za brojanje komponenti
+    Sta ucis: BFS nije samo "postoji li put" — moze i brojati regije.
+              Siri razumevanje gde se BFS primenjuje.
+
+[ ] 09_RottingOranges    *** HARD ***
+    Koncept: Multi-source BFS — vise startnih tacaka odjednom
+    Sta ucis: BFS moze krenuti istovremeno iz vise izvora.
+              Nivoi i dalje = broj minuta/koraka.
+
+[ ] 10_WordLadder        *** VERY HARD ***
+    Koncept: BFS na implicitnom grafu stringova
+    Sta ucis: BFS nije vezan za nizove ili gridove — primenjuje se
+              na BILO KOJI problem gde postoje čvorovi i komšije.
+              Ako resis ovo, resis bilo koji BFS zadatak.
+
+[ ] 11_FrogJumpMinSteps  *** VERY HARD ***  <-- hard case na kraju
+    Koncept: BFS bidirekcijalni + minimum koraka
+    Sta ucis: Kombinacija 06 (bidirekcijalni) + 07 (min koraci).
+              Najkompleksniji oblik FrogJump problema.
+
+---------------------------------------------------------------
+
+NAPOMENA:
+- Svaki folder ima: problem.md, Solution.java
+- 03_BFSvsDFS_QA ima: questions.txt i answers.txt
+- Resavaj redom — svaki zadatak priprema sledeci.
+- Nakon svakog resenja analiziramo zajedno.
+- BFS template iz 01 prolazi kroz SVE zadatke.

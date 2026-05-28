@@ -1,0 +1,99 @@
+PRE NEGO KRENES — Problem Solving Interview
+==============================================
+
+STA OVAJ INTERVJU MERI
+------------------------
+- Znaš li prepoznati koje KOMBINACIJE struktura resavaju problem efikasno.
+- Znaš li objasniti ZASTO si izabrao tu kombinaciju.
+- Znaš li da dizajniras cistу klasu/interfejs s jasno odvojenim odgovornostima.
+- Znaš li da evoliuras resenje — od prostog ka optimalnom.
+- Imenovanje, citljivost, logicka podela koda.
+
+
+KLJUCNO PITANJE KOJE TREBA DA POSTAVLJAS SEBI
+----------------------------------------------
+"Koja operacija mora biti brza, i koja struktura to omogucava?"
+
+Svaka struktura ima svoju jaku stranu:
+  HashMap     → O(1) lookup po kljucu
+  LinkedList  → O(1) dodavanje/brisanje s poznatim čvorom
+  Queue       → O(1) dodaj na kraj, uzmi s početka (FIFO)
+  Stack       → O(1) push/pop (LIFO)
+  Heap        → O(1) min ili max, O(log n) insert
+  TreeMap     → O(log n) sorted order + range queries
+  Deque       → O(1) s oba kraja
+  ArrayList   → O(1) random access po indeksu
+
+Vidi: data_structures_cheatsheet.txt za kompletan pregled.
+
+
+KAKO PRISTUPITI SVAKOM ZADATKU
+--------------------------------
+
+KORAK 1 — RAZUMIJ STA SISTEM RADI (interfejs)
+  Pre koda, definiši metode:
+    "Dakle, imamo insert(x) i getMin() — insert mora biti brz,
+     getMin mora biti O(1). To su dva razlicita zahtjeva."
+  Interviewer voli kad definisujes interfejs PRIJE implementacije.
+
+KORAK 2 — BRUTE FORCE
+  Uvek kazi: "Najjednostavnije resenje je da koristim jednu listu
+  i svakim pozivom getMin() prolazim kroz sve — to je O(n).
+  Nije prihvatljivo, ali to je polazna tacka."
+
+KORAK 3 — IDENTIFICIRAJ UZSKO GRLO
+  "Gde gubimo vrijeme? Gde gubimo prostor?"
+  Primer MinStack:
+    "Problem je: kad pop-ujem minimum, ne znam sta je bio prethodni minimum.
+     Treba mi neka memorija istorije minimuma."
+
+KORAK 4 — RAZMISLI O PODELI ODGOVORNOSTI
+  "Jedna struktura ne moze biti i brza i pamtiti red i brisati iz sredine.
+   Sta ako podijelim odgovornosti:
+     - Jedna struktura brine o redoslijedu.
+     - Druga brine o brzom pristupu."
+
+KORAK 5 — NAPISI KOD CISTO
+  - Klasa s jasnim imenom: FirstUniqueNumber, MinStack, BrowserHistory
+  - Metode s jasnim imenima: insert(), getFirstUnique(), push(), getMin()
+  - Privatne varijable s jasnim imenima: frequencyMap, orderQueue, minStack
+  - Bez "temp", "x", "map2", "list1"
+
+KORAK 6 — ANALIZIRAJ SVAKU OPERACIJU
+  Ne samo ukupno — po metodi:
+    "insert() je O(1) jer samo dodajemo u HashMap i na kraj LinkedHasMap.
+     getFirstUnique() je O(1) jer uzimamo prvi element LinkedHashMap."
+
+
+KAKO OBJASNITI KOMBINACIJU STRUKTURA (KLJUCNO)
+------------------------------------------------
+LOSE:  "Koristim LinkedHashMap i HashSet."
+
+DOBRO: "Trebam dve stvari istovremeno:
+        1. Brzo proveriti da li sam broj vidio — HashMap, O(1).
+        2. Pratiti redosled i moci brisati duplikate — LinkedHashMap.
+        LinkedHashMap mi daje OBOJE: cuva redosled umetanja i
+        O(1) brisanje po kljucu. Kad broj postane duplikat,
+        odmah ga brisem iz LinkedHashMap-a.
+        getFirstUnique() je onda uvek prvi element — O(1)."
+
+Svaka odluka = obrazlozenje. UVEK.
+
+
+CESTE GRESKE
+-------------
+x  Krenuti pisati kod bez definisanja interfejsa.
+x  Koristiti jednu strukturu i pokusati je "naterati" da radi sve.
+x  Lose imenovanje: "map", "list", "temp".
+x  Ne analizirati sloznost svake metode posebno.
+x  Zaboraviti na edge case: sta ako je struktura prazna?
+   getMin() na praznom stacku? getFirstUnique() kad su svi duplikati?
+
+
+STVARI KOJE NIJE LOSE PONOVITI PRE INTERVJUA
+-----------------------------------------------
+[ ] data_structures_cheatsheet.txt — sve strukture, sloznosti, kada koristiti
+[ ] Kombinacije: koja dva zajedno i zasto
+[ ] Swap-with-last trik (InsertDeleteGetRandom)
+[ ] Monotonic deque koncept (SlidingWindowMax)
+[ ] Two heaps pattern (MedianFromStream)

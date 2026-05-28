@@ -1,0 +1,95 @@
+APPROACHES
+==========
+
+1. Brute Force
+--------------------------
+- Keep a simple list of all inserted numbers.
+- On getFirstUnique(), iterate through the list and count occurrenćeš.
+- Return the first one with count == 1.
+
+- insert:          O(1)
+- getFirstUnique:  O(n^2)
+- Space:           O(n)
+
+Problem: getFirstUnique is way too slow for a stream.
+
+
+2. Queue + HashMap
+--------------------------
+Structures:
+  - HashMap<Integer, Integer>  →  number -> frequency count
+  - Queue<Integer>             →  maintains insertion order
+
+insert(num):
+  - Increment count in HashMap.
+
+getFirstUnique():
+  - Peek at front of Queue.
+  - If frequency > 1, poll it out (it's a duplicate), try next.
+  - Repeat until you find frequency == 1 or queue is empty.
+
+- insert:          O(1)
+- getFirstUnique:  O(n) worst case (all duplicates at front)
+- Space:           O(n)
+
+Better, but getFirstUnique still not guaranteed O(1).
+
+
+3. LinkedHashMap  ← CLEAN & SIMPLE
+--------------------------
+Structures:
+  - LinkedHashMap<Integer, Integer>  →  preserves insertion order + O(1) lookup
+  - HashSet<Integer>                 →  tracks seen duplicates
+
+insert(num):
+  - If first time seen:    add to LinkedHashMap.
+  - If seen before:        remove from LinkedHashMap (it's a duplicate).
+  - Mark as seen in HashSet regardless.
+
+getFirstUnique():
+  - Return the first key in LinkedHashMap → O(1).
+  - If empty, return -1.
+
+- insert:          O(1) amortized
+- getFirstUnique:  O(1)
+- Space:           O(n)
+
+Clean, readable, easy to explain. Best choice for the interview.
+
+
+4. Doubly Linked List + HashMap  ← OPTIMAL (most explicit control)
+--------------------------
+Structures:
+  - HashMap<Integer, Node>   →  number -> node in DLL
+  - Doubly Linked List       →  ordered unique numbers, O(1) removal
+
+insert(num):
+  - If not seen:      create node, add to tail of DLL, put in HashMap.
+  - If seen once:     remove node from DLL in O(1) using HashMap reference.
+  - If seen again:    already removed, do nothing.
+
+getFirstUnique():
+  - Return head of DLL → O(1).
+
+- insert:          O(1)
+- getFirstUnique:  O(1)
+- Space:           O(n)
+
+Most performant. Shows deep understanding of data structures.
+Harder to code cleanly under pressure.
+
+
+SUMMARY TABLE
+-------------
+Approach              insert    getFirstUnique   Space
+------------------------------------------------------
+Brute Force           O(1)      O(n^2)           O(n)
+Queue + HashMap       O(1)      O(n) worst        O(n)
+LinkedHashMap         O(1)      O(1)              O(n)
+DLL + HashMap         O(1)      O(1)              O(n)
+
+RECOMMENDATION FOR INTERVIEW:
+- Start by explaining brute force.
+- Move to Queue + HashMap as first improvement.
+- Land on LinkedHashMap — clean, readable, O(1) both operations.
+- Mention DLL + HashMap if asked for even more explicit control.

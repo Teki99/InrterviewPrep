@@ -1,0 +1,33 @@
+SUMMARY — Zapazanja i greske tokom vezbe
+==========================================
+Azuriraj ovaj fajl nakon svakog zavrsenog zadatka.
+
+FORMAT ZA SVAKI UNOS:
+----------------------
+[Datum] — [Naziv zadatka]
+  GRESKE:
+    - ...
+  NA STA OBRATITI PAZNJU:
+    - ...
+  DOBRO URADJENO:
+    - ...
+
+================================================================
+UNOSI
+================================================================
+
+(jos uvek nema unosa — pocni sa prvim zadatkom!)
+
+================================================================
+GLOBALNI OBRASCI (azurirati kad se ista greska ponovi 2+ puta)
+================================================================
+
+Ceste greske:
+  -
+
+Stvari koje treba uvezati:
+  -
+
+Napredak:
+  -
+

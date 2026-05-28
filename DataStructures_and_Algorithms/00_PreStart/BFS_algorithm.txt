@@ -1,0 +1,107 @@
+BFS — Breadth First Search
+===========================
+
+STA JE BFS
+-----------
+BFS istrazuje graf SLOJ PO SLOJ.
+Najpre poseti sve čvorove na udaljenosti 1 od početka,
+zatim sve na udaljenosti 2, itd.
+
+Misli o tome kao o kamenu bacenom u vodu — krugovi se sire jednako
+u svim smerovima, jedan sloj za drugim.
+
+
+KADA KORISTITI BFS
+-------------------
+✓ "Da li postoji put od A do B?"
+✓ "Koji je NAJKRACI put od A do B?" (BFS garantuje minimum koraka)
+✓ "Koliko koraka treba da se stigne do cilja?"
+✓ Kad god je vazno da najpre istrazis blize čvorove.
+
+
+STRUKTURA PODATAKA
+-------------------
+BFS koristi QUEUE (red) — FIFO.
+Ko je prvi usao u queue, prvi se obra duje.
+
+
+JAVA TEMPLATE — ZAPAMTI OVO
+-----------------------------
+
+// 1. Graf kao adjacency lista
+Map<Integer, List<Integer>> graph = new HashMap<>();
+
+// 2. Queue i visited
+Queue<Integer> queue  = new LinkedList<>();
+Set<Integer>   visited = new HashSet<>();
+
+// 3. Dodaj početni čvor
+queue.add(start);
+visited.add(start);
+
+// 4. Obradi dok ima čvorova
+while (!queue.isEmpty()) {
+    int current = queue.poll();          // uzmi prvi iz queue
+
+    if (current == target) return true;  // nasli smo cilj
+
+    for (int neighbour : graph.get(current)) {
+        if (!visited.contains(neighbour)) {
+            visited.add(neighbour);      // označi PRIJE nego dodas u queue
+            queue.add(neighbour);
+        }
+    }
+}
+return false;
+
+
+BFS ZA MINIMALNI BROJ KORAKA
+------------------------------
+Kada trebaš brojati korake (nivoe), prati velicinu queue-a po slojevima:
+
+int steps = 0;
+while (!queue.isEmpty()) {
+    int levelSize = queue.size();        // koliko čvorova je u ovom sloju
+    for (int i = 0; i < levelSize; i++) {
+        int current = queue.poll();
+        if (current == target) return steps;
+        // dodaj komšije u queue...
+    }
+    steps++;                             // prešli smo jedan sloj = jedan korak
+}
+
+
+IMPLICITNI GRAF (npr. FrogJump)
+---------------------------------
+Kada komšije nisu date eksplicitno, vec ih izracunavamo:
+
+// Umesto graph.get(current), koristicemo:
+int forward  = current + arr[current];
+int backward = current - arr[current];
+
+// Pa onda standardni BFS:
+if (forward < n && !visited[forward]) {
+    visited[forward] = true;
+    queue.add(forward);
+}
+if (backward >= 0 && !visited[backward]) {
+    visited[backward] = true;
+    queue.add(backward);
+}
+
+
+VREMENSKA I PROSTORNA SLOZNOST
+--------------------------------
+- Vremenska: O(V + E)  — V = čvorovi, E = ivice (svaki čvor/ivica jednom)
+- Prostorna: O(V)      — queue i visited mogu drzati sve čvorove
+
+
+KLJUCNA PRAVILA
+----------------
+1. Uvek označi čvor kao visited KADA GA DODAS U QUEUE,
+   ne kada ga izvadis. Inace možeš dodati isti čvor vise puta.
+
+2. Bez visited niza — beskonacna petlja u grafovima s ciklusima.
+
+3. BFS daje najkraci put jer sloj N sadrzi sve čvorove
+   na tacno N koraka od početka.

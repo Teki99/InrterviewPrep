@@ -1,0 +1,351 @@
+PRE NEGO KRENES — System Design Interview
+==========================================
+
+STA OVAJ INTERVJU MERI
+------------------------
+- Kako organizujes kompletan sistem od nule
+- Da li klase imaju jasne odgovornosti
+- Da li primenjujes OOP principe prirodno (ne na silu)
+- Da li razumijes efikasnost — kako cuvati i pristupati podacima
+- Da li PRICAŠ dok dizajniras — ovo je mozda najbitnija stvar
+
+NAJVAZNIJA STVAR U OVOM INTERVJUU: PRICAJ NAGLAS
+-------------------------------------------------
+Ne kodi u tisini. Svaki put kad donosiš odluku, reci je.
+
+  "Pravim Coordinate kao klasu jer cu ga prosledjivati svuda —
+   bolje je imati jedan objekat nego uvek prosledjivati row i col."
+
+  "Vracam ShotResult enum umesto boolean jer bool gubi informaciju —
+   ne znam da li je brod potopljen, samo da li je pogodak."
+
+  "Koristim 2D niz umesto HashMap jer je grid fiksan 10x10 —
+   nema potrebe za hash overhead-om kada znamo tacne dimenzije."
+
+Interviewer ne ocekuje savrseno resenje. Ocekuje da vidi
+KAKO RAZMISLJAS. Greska uz obrazlozenje je bolja od
+tacnog resenja bez objasnjenja.
+
+
+REDOSLED PRISTUPA ZADATKU
+--------------------------
+1. Razumij sistem (2-3 min)
+   - Ponovi zadatak: "Dakle, pravimo battleship gde..."
+   - Pitaj za ogranicenja: "Da li je grid uvek 10x10?"
+   - Definiši scope: "Fokusiram se na core logiku, ne na UI"
+
+2. Definiši entitete i enume (2-3 min)
+   - Najpre nabroj sta sve postoji u sistemu
+   - Definiši enume — oni su recnik celog sistema
+   - Tek onda klase
+
+3. Definiši klase i odgovornosti (5-7 min)
+   - Jedna recenicom po klasi: "Board je odgovoran za..."
+   - Ne ulazi u metode dok ne znas koje klase postoje
+
+4. Definiši metode (7-10 min)
+   - Za svaku klasu: koje akcije moze da izvede?
+   - Potpis metode + recenicom sta radi
+   - Pricaj o efikasnosti za kljucne metode
+
+5. Prodji kroz flow (2-3 min)
+   - Simuliraj jedan scenarijo od pocetka do kraja
+   - "Dakle, kada igrac puca: game.fire() poziva board.receiveShot()
+     koji vraca ShotResult..."
+
+
+================================================================
+DESIGN PATTERNS — NAJZASTUPLJENIJI
+================================================================
+
+Ovo nisu teorija radi teorije — ovo su alati koje ces prirodno
+primeniti ako dobro razmisljas o sistemu.
+
+
+----------------------------------------------------------------
+1. STRATEGY PATTERN
+----------------------------------------------------------------
+Problem: Imas vise nacina da radis istu stvar, i zelis da ih
+         lako menjis i dodajes bez izmene postojeceg koda.
+
+Kada koristiti:
+  - Razliciti nacini placanja (Cash, Card, Voucher)
+  - Razliciti tipovi popusta (Percentage, Fixed, Category)
+  - Razlicita AI ponasanja (EasyAI, HardAI)
+  - Razliciti nacini sortiranja
+
+Struktura:
+  interface DiscountStrategy {
+      BigDecimal apply(BigDecimal originalPrice);
+  }
+
+  class PercentageDiscount implements DiscountStrategy { ... }
+  class FixedDiscount      implements DiscountStrategy { ... }
+  class CategoryDiscount   implements DiscountStrategy { ... }
+
+  class Cart {
+      private List<DiscountStrategy> discounts;
+
+      BigDecimal calculateTotal() {
+          // primeni svaki discount redom
+      }
+  }
+
+Kljucna rec: "Zelis da dodas novi tip bez menjanja postojeceg koda."
+             Kad to citas u zadatku — Strategy pattern.
+
+
+----------------------------------------------------------------
+2. OBSERVER PATTERN
+----------------------------------------------------------------
+Problem: Kada se nesto desi, vise objekata treba da bude
+         obavesteno, ali sender ne treba da zna ko su primatelji.
+
+Kada koristiti:
+  - Igra je gotova → obavestiti sve (UI, logger, score system)
+  - Brod je potopljen → obavestiti igrace
+  - Porudzbina promenila status → obavestiti korisnika, kurir, admin
+
+Struktura:
+  interface GameObserver {
+      void onShipSunk(Player player, ShipType ship);
+      void onGameOver(Player winner);
+  }
+
+  class Game {
+      private List<GameObserver> observers = new ArrayList<>();
+
+      void addObserver(GameObserver observer) { ... }
+
+      private void notifyShipSunk(Player player, ShipType ship) {
+          observers.forEach(o -> o.onShipSunk(player, ship));
+      }
+  }
+
+  class ScoreTracker  implements GameObserver { ... }
+  class GameLogger    implements GameObserver { ... }
+  class UINotifier    implements GameObserver { ... }
+
+Kljucna rec: "Sistem treba da reaguje na dogadjaje."
+             Kada citas "notify", "event", "on change" — Observer.
+
+
+----------------------------------------------------------------
+3. FACTORY / FACTORY METHOD
+----------------------------------------------------------------
+Problem: Zelis da kreiras objekte bez hardkodiranja tacnog tipa.
+         Logika kreiranja pripada jednom mestu, ne svuda.
+
+Kada koristiti:
+  - Kreiranje razlicitih tipova brodova
+  - Kreiranje razlicitih tipova notifikacija
+  - Kreiranje razlicitih tipova vozila u parking sistemu
+
+Primer — bez factory:
+  // svuda u kodu:
+  if (type == ShipType.CARRIER)    new Ship(5, ...);
+  if (type == ShipType.DESTROYER)  new Ship(2, ...);
+
+Primer — sa factory:
+  class ShipFactory {
+      static Ship create(ShipType type) {
+          return new Ship(type, type.getSize());
+          // sve detalje zna factory, ne caller
+      }
+  }
+
+  // svuda u kodu samo:
+  Ship ship = ShipFactory.create(ShipType.CARRIER);
+
+Kljucna rec: "Kreiranje objekta zahteva logiku" ili
+             "Ne zeliš da caller zna kako se objekat pravi."
+
+
+----------------------------------------------------------------
+4. BUILDER PATTERN
+----------------------------------------------------------------
+Problem: Objekat ima mnogo polja, neka su opcionalna.
+         Konstruktor sa 7 parametara je necitljiv.
+
+Kada koristiti:
+  - Pizza (velicina + kora + N toppinga)
+  - Notifikacija (recipient, message, subject?, attachment?, priority)
+  - Query builder, konfiguracija
+
+  Pizza pizza = Pizza.builder()
+      .size(PizzaSize.LARGE)
+      .crust(CrustType.THIN)
+      .addTopping(ToppingType.MOZZARELLA)
+      .addTopping(ToppingType.PEPPERONI)
+      .build();
+
+  vs.
+
+  new Pizza(PizzaSize.LARGE, CrustType.THIN, null, true, false, List.of(...))
+  // sta znaci null? i true? i false?
+
+Kljucna rec: "Objekat sa mnogo opcionalnih parametara" →
+             konstruktor postaje necitljiv → Builder.
+
+
+----------------------------------------------------------------
+5. SINGLETON PATTERN
+----------------------------------------------------------------
+Problem: Zelis da postoji tacno jedna instanca neke klase.
+
+Kada koristiti:
+  - Logger
+  - Konfiguracija
+  - Database konekcija
+  - Game instance (samo jedna igra aktivna)
+
+  class GameLogger {
+      private static GameLogger instance;
+
+      private GameLogger() {}
+
+      public static GameLogger getInstance() {
+          if (instance == null) {
+              instance = new GameLogger();
+          }
+          return instance;
+      }
+  }
+
+NAPOMENA: Singleton se cesto kritikuje (tezi testiranju).
+          U intervjuu ga pomeni ali i navedi da u produkciji
+          razmisljao bi o dependency injection umesto toga.
+
+
+----------------------------------------------------------------
+6. STATE PATTERN
+----------------------------------------------------------------
+Problem: Objekat se drugacije ponasa u zavisnosti od
+         svog trenutnog stanja. If/else po stanju raste.
+
+Kada koristiti:
+  - Porudzbina (RECEIVED, IN_PREP, READY, DELIVERED)
+  - Igra (SETUP, IN_PROGRESS, FINISHED)
+  - Rezervacija (PENDING, CONFIRMED, EXPIRED, CANCELLED)
+
+  LOSE:
+    void addPizza(Pizza p) {
+        if (status == RECEIVED) { ... }
+        else if (status == IN_PREP) throw new Exception(...);
+        else if (status == DELIVERED) throw new Exception(...);
+    }
+
+  DOBRO:
+    interface OrderState {
+        void addPizza(Order order, Pizza pizza);
+        void cancel(Order order);
+    }
+
+    class ReceivedState implements OrderState {
+        void addPizza(Order order, Pizza pizza) { order.getPizzas().add(pizza); }
+    }
+
+    class InPreparationState implements OrderState {
+        void addPizza(Order order, Pizza pizza) {
+            throw new IllegalStateException("Cannot modify order in preparation");
+        }
+    }
+
+Kljucna rec: "Ponasanje objekta zavisi od stanja" i
+             imas vise od 2-3 stanja — State pattern.
+
+
+----------------------------------------------------------------
+7. DECORATOR PATTERN
+----------------------------------------------------------------
+Problem: Zelis da dodas ponasanje objektu dinamicki,
+         bez menjanja njegove klase.
+
+Kada koristiti:
+  - Dodavanje toppinga pizzi (svaki topping dodaje cenu)
+  - Dodavanje opcija automobilu u konfiguraciji
+  - Dodavanje middleware-a u HTTP pipeline
+
+  interface Pizza {
+      BigDecimal calculatePrice();
+      String getDescription();
+  }
+
+  class BasePizza implements Pizza { ... }
+
+  class ToppingDecorator implements Pizza {
+      private final Pizza wrappedPizza;
+      private final ToppingType topping;
+
+      BigDecimal calculatePrice() {
+          return wrappedPizza.calculatePrice().add(topping.getPrice());
+      }
+  }
+
+  // Upotreba:
+  Pizza pizza = new ToppingDecorator(
+                    new ToppingDecorator(
+                        new BasePizza(PizzaSize.LARGE),
+                        ToppingType.MOZZARELLA),
+                    ToppingType.PEPPERONI);
+
+Kljucna rec: "Dinamicko dodavanje funkcionalnosti bez nasledjivanja."
+
+
+================================================================
+KADA KOJI PATTERN — BRZA REFERENCA
+================================================================
+
+Situacija                               Pattern
+----------------------------------------------------------------------
+Vise nacina placanja / popusta          Strategy
+Sistem reaguje na dogadjaje             Observer
+Kreiranje objekata sa logikom           Factory
+Objekat sa mnogo opt. parametara        Builder
+Tacno jedna instanca                    Singleton
+Ponasanje zavisi od stanja              State
+Dinamicko dodavanje funkcionalnosti     Decorator
+
+ZLATNO PRAVILO:
+  Ne pocinjaj od "koji pattern da primenim?"
+  Pocinjaj od "koji problem imam?"
+  Pattern ce prirodno proisteći.
+
+  Ako moras da forsiras pattern — vjerovatno nije potreban.
+
+
+================================================================
+EFIKASNOST — STA TREBA DA OBRAZLOZIŠ
+================================================================
+
+Za svaku kljucnu strukturu podataka, budi spreman da kazes:
+  1. Sta si izabrao
+  2. Zasto (ne neku drugu opciju)
+  3. Koja je vremenska sloznost kljucnih operacija
+
+Primer za Battleship board:
+  "Koristim Cell[10][10] — 2D niz enumova.
+   Pristup celiji je O(1) po koordinati.
+   Razmisljao sam o HashMap<Coordinate, Cell> ali grid je fiksan
+   10x10 pa nema smisla imati hash overhead.
+   Char[][] bi radilo ali enum je citljiviji i type-safe."
+
+Primer za pronalazenje pogodjenoh broda:
+  "Kada Board dobije pogodak na koordinati, treba da nadje
+   koji brod je tu. Opcija 1: prolazim kroz sve brodove O(k)
+   gde je k broj brodova — prihvatljivo jer k<=5.
+   Opcija 2: Map<Coordinate, Ship> za O(1) lookup.
+   Pominjam obe opcije i biram drugu ako je performans bitan."
+
+
+================================================================
+CHECKLISTA PRE PISANJA
+================================================================
+
+[ ] Razumeo sam sistem i pitao za ogranicenja
+[ ] Definisao sam scope (sta ulazi, sta ne)
+[ ] Napisao sam enume pre klasa
+[ ] Svaka klasa ima jednu recenicu odgovornosti
+[ ] Znam koji pattern bih primenio i zasto
+[ ] Spreman sam da obrazlozim izbor strukture podataka
+[ ] Pricam naglas svaki korak

@@ -1,0 +1,395 @@
+PRE NEGO KRENES — Logic and Maintainable Interview
+====================================================
+
+STA OVAJ INTERVJU MERI
+------------------------
+Interviewer ne gleda da li "radi" — gleda da li bi mogao da preuzme
+tvoj kod bez ijednog objasnjenja i da nastavi da ga razvija.
+
+Pitanja koja interviewer ima u glavi dok gleda tvoj kod:
+  - "Da li cu razumeti ovaj kod za 6 meseci?"
+  - "Da li mogu da dodam novu funkcionalnost bez da diram postojece klase?"
+  - "Da li ce novi developer na timu razumeti API bez dokumentacije?"
+
+Ako je odgovor DA na sva tri — uradio si dobar posao.
+
+
+================================================================
+PRIORITETI — STA JE VAZNO, STA JE MANJE VAZNO
+================================================================
+
+PRIMARNI FOKUS (ovo interviewer najvise gleda):
+  1. Imenovanje — metode, klase, promenljive
+  2. Enumi umesto String/int za tipove i statuse
+  3. Separation of concerns — ko sta radi
+  4. Intuitivan API — moze li se koristiti bez objasnjenja
+  5. Encapsulacija — ne izlazi interno stanje
+
+SEKUNDARNI FOKUS (gleda se, ali nije primarno):
+  6. OOP — nasledjivanje, interfejsi, apstraktne klase
+     Bitno je da POSTOJI gde ima smisla, ali intervju
+     nije test poznavanja OOP teorije.
+     Greska nije "nisam napravio apstraktnu klasu" —
+     greska je "napravio sam nasledjivanje gde nema smisla"
+     ili "nisam ga napravio gde ocito ima smisla".
+
+  7. Design patterns — Builder, Factory i sl.
+     Korisno ako prirodno proistice iz dizajna.
+     Nije potrebno forsirati pattern radi patterna.
+
+PRAVILO: Ako imas 20 minuta — potrosi 15 na imenovanje i
+         strukturu, 5 na OOP hijerarhiju.
+
+
+================================================================
+KAKO VEZDAMO
+================================================================
+
+1. Ti napises dizajn u Solution.java (bez implementacije —
+   samo klase, enumi, potpisi metoda + komentar sta rade)
+2. Paste kod ovde
+3. Ja pregledam i kazem:
+   - Sta je dobro uradjeno
+   - Gde ima greske i zasto
+   - Sta bi interviewer primetio
+   - Kako popraviti
+
+Fokus analize uvek ide ovim redom:
+  Imenovanje → Enumi → Separation of concerns → API → OOP
+
+
+================================================================
+1. NIKAD STRING / INT ZA TIPOVE I STATUSE
+================================================================
+
+LOSE:
+  String paymentMethod = "CASH";
+  int orderStatus = 1;
+  String pizzaSize = "LARGE";
+  double price = 12.99;  // double za novac!
+
+DOBRO:
+  PaymentMethod paymentMethod = PaymentMethod.CASH;
+  OrderStatus orderStatus = OrderStatus.RECEIVED;
+  PizzaSize pizzaSize = PizzaSize.LARGE;
+  BigDecimal price = new BigDecimal("12.99");
+
+ZASTO:
+  - String se moze pogresno ukucati, enum ne moze
+  - int nema semantiku — sta znaci status = 3?
+  - double ima greske u zaokruzivanju novca (0.1 + 0.2 != 0.3 u floatu!)
+  - Enum kompajler proverava — String ne
+
+ZA NOVAC UVEK BigDecimal, nikad double/float.
+
+
+================================================================
+2. ENUM SA PODACIMA I METODAMA
+================================================================
+
+Enum nije samo labela — moze nositi podatke i logiku.
+
+LOSE:
+  enum PizzaSize { SMALL, MEDIUM, LARGE }
+
+  // negde drugde u kodu:
+  double getBasePrice(PizzaSize size) {
+      switch (size) {
+          case SMALL:  return 5.0;
+          case MEDIUM: return 7.0;
+          case LARGE:  return 9.0;
+      }
+  }
+
+DOBRO:
+  enum PizzaSize {
+      SMALL(5.0),
+      MEDIUM(7.0),
+      LARGE(9.0);
+
+      private final double basePrice;
+
+      PizzaSize(double basePrice) {
+          this.basePrice = basePrice;
+      }
+
+      public double getBasePrice() { return basePrice; }
+  }
+
+ZASTO:
+  Cena je osobina velicine, ne neke druge klase.
+  Ako dodas novu velicinu, cena se definise na jednom mestu.
+  Nema switch-case rasut po kodu.
+
+ENUM ZA TRANZICIJE (state machine):
+
+  LOSE:
+    // u TrafficLight klasi:
+    if (current == GREEN) next = YELLOW;
+    else if (current == YELLOW) next = RED;
+    else next = GREEN;
+
+  DOBRO:
+    enum LightColor {
+        GREEN  { @Override public LightColor next() { return YELLOW; } },
+        YELLOW { @Override public LightColor next() { return RED;    } },
+        RED    { @Override public LightColor next() { return GREEN;  } };
+
+        public abstract LightColor next();
+    }
+
+  Svaka boja zna svog sledbenika. Tranzicija je deo enuma, ne klase.
+
+
+================================================================
+3. IMENOVANJE METODA
+================================================================
+
+PRAVILO: Metoda treba da se cita kao recenia na engleskom.
+
+Boolean metode — uvek is/has/can/should prefiks:
+  LOSE: getAvailable(), checkExpiry(), validStatus()
+  DOBRO: isAvailable(), hasExpired(), isValidForCheckout()
+
+  order.isModifiable()         — da li se moze menjati
+  reservation.hasExpired()     — da li je istekla
+  cart.isEmpty()               — da li je korpa prazna
+  voucher.coversFullAmount()   — da li pokriva ceo iznos
+  spot.canFit(vehicle)         — da li vozilo staje
+
+Akcione metode — uvek glagol + imenica:
+  LOSE: topping(), price(), status()
+  DOBRO: addTopping(), calculatePrice(), updateStatus()
+
+  pizza.addTopping(ToppingType.MUSHROOMS)
+  order.calculateTotal()
+  booking.confirmPayment()
+  ticket.generateBarcode()
+  lot.findAvailableSpot(vehicle)
+
+Factory / kreiranje:
+  LOSE: new Order(...)  svuda
+  DOBRO: Order.create(...) ili Order.forCustomer(customer)
+
+Getteri koji racunaju — ne koristiti get prefix:
+  LOSE: getTotalPrice()  — zvuci kao da samo vraca polje
+  DOBRO: calculateTotal() — jasno da se nesto racuna
+
+
+================================================================
+4. SEPARATION OF CONCERNS — KO STA RADI
+================================================================
+
+Svaka klasa ima JEDNU odgovornost. Pitaj se:
+"Koji je jedini razlog zbog kojeg bi ova klasa mogla da se promeni?"
+
+LOSE — Pizza klasa koja radi previse:
+  class Pizza {
+      void addTopping() {}
+      double calculateOrderTotal() {}   // ovo nije posao Pizze!
+      void processPayment() {}          // definitivno nije!
+      void printReceipt() {}            // nikako!
+  }
+
+DOBRO — svako radi svoj posao:
+  Pizza        → zna svoju cenu, svoje toppings, svoju vrstu
+  Order        → zna koje pizze su narucene, racuna ukupno
+  PaymentService → obradjuje placanje
+  ReceiptGenerator → generise racun
+
+TIPICNA PODELA ZA SISTEME OVOG TIPA:
+
+  Model klase (sta su stvari):
+    Pizza, Order, Ticket, Seat, Vehicle...
+
+  Service klase (sta se radi sa stvarima):
+    BookingService, PaymentService, PricingService...
+
+  Value objekti (nepromenljivi podaci):
+    Money, Address, DateRange, BookingReference...
+
+  Pomocne klase:
+    ReceiptGenerator, FeeCalculator, DiscountApplier...
+
+
+================================================================
+5. INTERFEJS VS APSTRAKTNA KLASA
+================================================================
+
+INTERFEJS kada:
+  - Razlicite klase dele SPOSOBNOST, ali ne i stanje
+  - "Moze da uradi X": Payable, Discountable, Reservable
+  - Vise tipova treba da implementira isti ugovor
+
+  interface Discountable {
+      BigDecimal applyDiscount(BigDecimal originalPrice);
+  }
+
+  class PercentageDiscount implements Discountable { ... }
+  class FixedAmountDiscount implements Discountable { ... }
+  class CategoryDiscount implements Discountable { ... }
+
+APSTRAKTNA KLASA kada:
+  - Klase dele STANJE (polja) i deo implementacije
+  - "Jeste nesto" sa zajednickim ponasanjem
+  - Nema smisla kreirati instancu te klase direktno
+
+  abstract class Vehicle {
+      private final String licensePlate;
+      private final VehicleType type;
+
+      abstract List<SpotType> getCompatibleSpots();
+  }
+
+  class Car extends Vehicle { ... }
+  class Truck extends Vehicle { ... }
+
+PRAVILO PALCA:
+  Imas zajednicki KOD? → apstraktna klasa
+  Imas zajednicki UGOVOR (API)? → interfejs
+  Nisi siguran? → interfejs (fleksibilniji)
+
+
+================================================================
+6. PODELI API AKO KLASA IMA DVE ULOGE
+================================================================
+
+Ako klasa ima metode koje su relevantne za RAZLICITE korisnike,
+razmisli o podeli na dva interfejsa.
+
+Primer — ParkingLot:
+  Vozac koristi: enter(), exit()
+  Administrator koristi: getAvailableSpots(), addLevel(), closeSpot()
+
+  LOSE:
+    class ParkingLot {
+        Ticket enter(Vehicle v) {}
+        Receipt exit(Ticket t) {}
+        int getAvailableSpots(SpotType type) {}
+        void addLevel(Level level) {}
+        void closeSpot(String spotId) {}
+    }
+
+  DOBRO:
+    interface ParkingEntrance {
+        Ticket enter(Vehicle vehicle);
+        Receipt exit(Ticket ticket);
+    }
+
+    interface ParkingManagement {
+        int getAvailableSpots(SpotType type);
+        void addLevel(Level level);
+        void closeSpot(String spotId);
+    }
+
+    class ParkingLot implements ParkingEntrance, ParkingManagement { ... }
+
+Ovo se zove Interface Segregation — klijent ne treba da zna
+za metode koje ne koristi.
+
+
+================================================================
+7. ENCAPSULACIJA — NE IZLAZI UNUTRASNJE STANJE
+================================================================
+
+LOSE:
+  class Order {
+      public List<Pizza> pizzas = new ArrayList<>();  // direktan pristup!
+  }
+  // negde drugde:
+  order.pizzas.add(pizza);       // zaobilazi svu logiku!
+  order.pizzas.remove(0);        // ko ce da azurira status?
+
+DOBRO:
+  class Order {
+      private final List<Pizza> pizzas = new ArrayList<>();
+
+      public void addPizza(Pizza pizza) {
+          validateCanModify();   // proverava status pre dodavanja
+          pizzas.add(pizza);
+      }
+
+      public List<Pizza> getPizzas() {
+          return Collections.unmodifiableList(pizzas);  // ne moze da se menja spolja
+      }
+  }
+
+Vrati KOPIJU ili UNMODIFIABLE listu — ne originalni objekat.
+
+
+================================================================
+8. EDGE CASES — UVEK POMENI TOKOM INTERVJUA
+================================================================
+
+Cak i ako ih ne implementiras, POMENI ih. To pokazuje zrelost.
+
+Pre nego sto krenes da kodiras, reci:
+  "Pre implementacije zelim da napomenem nekoliko edge case-ova
+   koje cu imati na umu: ..."
+
+Tipicni edge case-ovi za sisteme ovog tipa:
+
+  Kolicine i cene:
+    - Negativna cena / kolicina
+    - Kolicina = 0
+    - Voucher veci od ukupnog iznosa
+    - Overflow kod velikih kolicina
+
+  Stanja i tranzicije:
+    - Izmena porudzbine koja je vec u pripremi
+    - Placanje vec placene porudzbine
+    - Otkazivanje isporucene porudzbine
+    - Rezervacija koja je istekla
+
+  Kolekcije:
+    - Prazna korpa pri checkout-u
+    - Dodavanje istog toppinga dva puta
+    - Uklanjanje stavke koja ne postoji
+
+  Nul i prazno:
+    - null korisnik
+    - Prazno ime
+    - Nepostojeci ID
+
+
+================================================================
+9. BUILDER PATTERN — KADA OBJEKAT IMA PUNO OPCIONALNIH POLJA
+================================================================
+
+Kada klasa ima 4+ polja od kojih su neka opcionalna:
+
+  LOSE:
+    new Pizza(PizzaSize.LARGE, CrustType.THIN, true, false, null, List.of(...))
+    // sta znaci 3. parametar? i 4.? i zasto je 5. null?
+
+  DOBRO:
+    Pizza pizza = Pizza.builder()
+        .size(PizzaSize.LARGE)
+        .crust(CrustType.THIN)
+        .addTopping(ToppingType.MOZZARELLA)
+        .addTopping(ToppingType.PEPPERONI)
+        .build();
+
+Kandidati za Builder u tipicnim sistemima:
+  Pizza (velicina + kora + N toppinga)
+  Notification (recipient + message + subject? + attachment? + priority)
+  Reservation (screening + seats + expiry + customer)
+
+
+================================================================
+10. BRZA REFERENCA — PITANJA KOJA TREBA DA POSTAVLJAS SEBI
+================================================================
+
+Pre nego sto napises bilo sta, prodji kroz ovu listu:
+
+[ ] Da li koristim String ili int umesto enuma negde?
+[ ] Da li koristim double/float za novac? (treba BigDecimal)
+[ ] Da li metoda radi vise od jedne stvari?
+[ ] Da li je naziv metode jasan bez komentara?
+[ ] Da li boolean metoda pocinje sa is/has/can?
+[ ] Da li akciona metoda pocinje sa glagolom?
+[ ] Da li klasa ima vise od jedne odgovornosti?
+[ ] Da li izlazim interno stanje direktno (public list, mutable return)?
+[ ] Da li sam pomislio na edge case-ove?
+[ ] Da li koristim nasledjivanje tamo gde bi interfejs bio bolji?
+[ ] Da li bi neko ko prvi put vidi kod razumeo API?

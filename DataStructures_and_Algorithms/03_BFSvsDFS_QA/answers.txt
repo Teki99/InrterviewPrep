@@ -1,0 +1,110 @@
+BFS vs DFS — Odgovori
+======================
+
+---------------------------------------------------------------
+
+OSNOVNA PITANJA
+
+A1. Osnovna razlika u obilasku:
+    BFS: istrazuje sve komšije trenutnog čvora PRIJE nego ide dublje.
+         Siri se "po slojevima" — najpre svi na udaljenosti 1, pa 2, pa 3...
+    DFS: ide sto dublje moze po jednoj grani, pa se vraca (backtrack)
+         i pokusava drugu granu.
+
+A2. Strukture podataka:
+    BFS koristi QUEUE (red) — FIFO — ko je prvi usao, prvi se obra duje.
+    DFS koristi STACK (implicitno kroz rekurziju, ili eksplicitno).
+         LIFO — zadnji usao, prvi se obra duje.
+
+A3. Bez visited[]:
+    BFS: moze da obiduje isti čvor vise puta, ali ne ulazi u beskonacnu
+         petlju jer queue eventualno ostane prazan (u aciklicnom grafu).
+         U grafu sa ciklusima — beskonacna petlja.
+    DFS: u grafu sa ciklusima odmah ulazi u beskonacnu rekurziju
+         i uzrokuje StackOverflowError.
+    Zakljucak: visited[] je OBAVEZAN kad god graf moze imati cikluse.
+
+A4. BFS garantuje najkraci put u neuteznenom grafu.
+    Razlog: BFS istrazuje sloj po sloj. Kada prvi put stigne do cilja,
+            dosao je najkracim putem (minimalnim brojem koraka).
+    DFS ne garantuje — moze pronaci put koji je daleko od najkraceg
+    jer ide duboko po jednoj grani ne znajuci da postoji kraci put.
+
+---------------------------------------------------------------
+
+SLOZZENOST
+
+A5. Oba imaju vremensku sloznost O(V + E) gde:
+    V = broj čvorova (vertićeš), E = broj ivica (edges).
+    Razlog: oba posjete svaki čvor i svaku ivicu tacno jednom.
+    Razliciti su po REDOSLIJEDU posjeta, ali ne po BROJU posjeta.
+
+A6. Prostorna sloznost:
+    BFS u siroko razgranatom grafu (puno komšija):
+      Queue moze sadrzavati celi sloj — O(W) gde W = sirina grafa.
+      Ovo moze biti VERY LARGE ako ima puno komšija.
+
+    DFS u duboko razgranatom grafu (lanac čvorova):
+      Rekurzivni stack raste do maksimalne dubine — O(D).
+      Ovo moze biti VERY LARGE ako je graf dubok (stack overflow rizik).
+
+    Pravilo: BFS je skupi na sirokim grafovima, DFS na dubokim.
+
+---------------------------------------------------------------
+
+PRIMJENA
+
+A7. "Da li postoji put od A do B?" — OBOJE radi.
+    DFS je često jednostavniji za implementaciju (rekurzija).
+    BFS je bolji ako ocekujes da je put kratak (nace ga brze).
+
+A8. "Koji je NAJKRACI put od A do B?" — BFS, obavezno.
+    DFS ne garantuje najkraci put.
+
+A9. "Postoji li ciklus?" — OBOJE moze, ali DFS je prirodniji.
+    DFS prirodno detektuje ciklus kada nai de na vec posec eni čvor
+    koji je TRENUTNO na rekurzivnom stacku (nije samo visited, vec aktivan).
+
+A10. "Izlistaj sve moguce puteve" — DFS, obavezno.
+     BFS nije pogodan za generisanje svih puteva.
+     DFS sa backtrackingom prirodno prolazi sve puteve.
+
+A11. U FrogJump DFS bi takodje dao tacan da/ne odgovor.
+     BFS je prirodniji jer:
+     - Sistematicno istrazuje sve dostizne pozicije
+     - Lako se prosiruje na "minimum koraka" (samo broji nivoe)
+     - Iterativna implementacija izbjegava stack overflow rizik
+       koji DFS ima na velikim nizovima
+
+---------------------------------------------------------------
+
+KONCEPTUALNO
+
+A12. "BFS po slojevima" znaci:
+     Sloj 0: početni čvor
+     Sloj 1: svi čvorovi dostizni u 1 koraku od početnog
+     Sloj 2: svi čvorovi dostizni u 2 koraka
+     ...itd.
+     Svaki čvor se obra duje tek kada su SVI čvorovi blize njemu
+     vec obra deni. Ovo je razlog zasto BFS daje najkraci put.
+
+A13. Kada DFS ne moze dalje (nema neposec enih komšija):
+     Vraca se (backtrack) na prethodni čvor i pokusava drugu granu.
+     Ovo se desava automatski kroz rekurziju (return iz rekurzivnog poziva).
+
+A14. Da, DFS se moze implementirati iterativno koristeci eksplicitni STACK.
+     Umesto rekurzivnog poziva, gurnes komšije na stack i skidas ih.
+     Razlika od BFS-a: samo zamijenis Queue sa Stack.
+
+     BFS: Queue → FIFO → siri se u sirinu
+     DFS: Stack → LIFO → ide u dubinu
+
+A15. Bez visited[] na primeru [2, 1]:
+     Start: index 0 (arr[0] = 2)
+     Skoci na 0+2 = 2 (kraj niza, n-1 = 1? ne, n=2, n-1=1...)
+     Hmm, konkretan primer sa ciklusom: [1, 1]
+     index 0: skoci na 0+1=1 ili 0-1=-1 (out of bounds)
+     index 1: skoci na 1+1=2 (out of bounds) ili 1-1=0
+     Bez visited: 0->1->0->1->0->1... beskonacno.
+     Sa visited: posetis 0, posetis 1, iz 1 pokusas 0 ali visited — stop.
+     Visited[] je kljuc koji pretvara beskonacni graf u konacno istrazivanje.
